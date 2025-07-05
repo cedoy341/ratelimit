@@ -1,10 +1,36 @@
-
+# ratelimit
+--
+    import "github.com/juju/ratelimit"
 
 The ratelimit package provides an efficient token bucket implementation. See
 http://en.wikipedia.org/wiki/Token_bucket.
 
 ## Usage
 
+#### func  Limiter
+
+Limiter for Automatic Bucket Management
+The Limiter type manages a collection of token buckets. It's useful when you need to rate-limit multiple independent entities (e.g., users, IP addresses, API keys) and want to automatically clean up the resources for entities that are no longer active.
+#### func NewLimiter(ttl time.Duration, newBucket func() *Bucket) *Limiter
+
+A Limiter creates, manages, and automatically cleans up token buckets that have not been used for a specified Time-To-Live (TTL) duration.
+
+#### func NewLimiter
+```go
+
+func NewLimiter(ttl time.Duration, newBucket func() *Bucket) *Limiter
+NewLimiter creates a new Limiter. It takes a ttl for expiring unused buckets and a factory function (newBucket) that defines how to create new buckets (e.g., their rate and capacity). A background goroutine runs periodically to clean up expired buckets.
+```
+#### func (*Limiter) Get
+```go
+func (l *Limiter) Get(key string) *Bucket
+Get returns the token bucket for the given key. If a bucket for the key does not exist, a new one is created using the factory function provided to NewLimiter. Each call to Get updates the bucket's last access time, preventing it from expiring.
+```
+#### func (*Limiter) Stop
+```go
+func (l *Limiter) Stop()
+Stop terminates the background cleanup goroutine. It is called automatically when the Limiter is garbage collected, but can be invoked manually to stop it sooner.
+```
 #### func  Reader
 
 ```go
